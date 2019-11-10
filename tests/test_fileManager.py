@@ -10,7 +10,6 @@ from FileManager import FileManager
 
 
 def teardown_module(module):
-    print('\nTear down module')
     LogCapture.uninstall_all()
 
 
@@ -108,11 +107,3 @@ def test_save(mock_exists, monkeypatch, sut, log):
         ('root', 'DEBUG', 'Created backup file dir/log_backups/filename-002.ext'),
         ('root', 'DEBUG', 'Updated file dir/filename.ext')
     )
-
-
-def test__backup(sut):
-    pass
-
-
-def test__write_lines(sut):
-    pass

@@ -3,8 +3,8 @@
 import argparse
 import logging
 
-from CountHours import MarkdownProcessor
 from FileManager import FileManager
+from MarkdownProcessor import MarkdownProcessor
 
 
 def parse_arguments():
