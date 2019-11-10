@@ -1,6 +1,6 @@
 from assertpy import assert_that
 
-from CountHours import read_current_month, read_non_calculated_hours, read_calculated_hours
+from MarkdownProcessor import read_current_month, read_non_calculated_hours, read_calculated_hours
 
 
 def test_read_current_month():
