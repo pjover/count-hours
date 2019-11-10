@@ -10,9 +10,6 @@ from os.path import splitext
 DEBUG = False
 DEFAULT_FILE_NAME = 'log.md'
 
-regexp1 = re.compile('[(]([-+: 0-9]*)[)]')
-regexp2 = re.compile('([0-2][0-9]:[0-5][0-9])-([0-2][0-9]:[0-5][0-9])')
-regexp3 = re.compile('\[([.0-9]*)[ h\]]')
 BACKUP_FOLDER = 'log_backups'
 
 
@@ -33,8 +30,8 @@ def backup(file_path: str):
 
     backup_path = os.path.join(backup_folder, parts[1])
     path_and_filename, ext = splitext(backup_path)
-    for i in count():
-        next_backup_file = '{0}-{1:03d}{2}'.format(path_and_filename, i, ext)
+    for counter in count():
+        next_backup_file = '{0}-{1:03d}{2}'.format(path_and_filename, counter, ext)
         if not os.path.exists(next_backup_file):
             shutil.move(file_path, next_backup_file)
             return next_backup_file
@@ -46,48 +43,55 @@ def save(file_path: str, _lines: list):
             f.write(_line)
 
 
-def read_current_month(line):
-    return line[9:16]
+def read_current_month(_line):
+    return _line[9:16]
 
 
-def read_non_calculated_hours(line):
-    total_time = None;
+parse_non_calculated_hours_segments = re.compile(r'[(]([-+: 0-9]*)[)]')
+parse_non_calculated_hours_segment = re.compile(r'([0-2][0-9]:[0-5][0-9])-([0-2][0-9]:[0-5][0-9])')
 
-    result = regexp1.search(line)
-    if result == None:
+
+def read_non_calculated_hours(_line):
+    _total_time = None
+
+    result = parse_non_calculated_hours_segments.search(_line)
+    if not result:
         return None
 
     else:
         segments = result.group(1).split('+')
         if DEBUG:
-            print('Trobats: ', segments)
+            print('Found: ', segments)
         for segment in segments:
-            result = regexp2.search(segment)
-            if result == None:
+            result = parse_non_calculated_hours_segment.search(segment)
+            if not result:
                 return None
 
             start = result.group(1)
             end = result.group(2)
             delta_time = datetime.strptime(end, '%H:%M') - datetime.strptime(start, '%H:%M')
             if DEBUG:
-                print('\tInici: {0}\tFinal: {1}\tDiferència: {2}'.format(start, end, delta_time))
-            if (total_time):
-                total_time = total_time + delta_time
+                print('\tStart: {0}\tEnd: {1}\tDifference: {2}'.format(start, end, delta_time))
+            if _total_time:
+                _total_time = _total_time + delta_time
             else:
-                total_time = delta_time
+                _total_time = delta_time
 
-    return total_time
+    return _total_time
 
 
-def read_calculated_hours(line):
-    result = regexp3.search(line)
-    if result == None:
+parse_calculated_hours = re.compile(r'\[([.0-9]*)[ h\]]')
+
+
+def read_calculated_hours(_line):
+    result = parse_calculated_hours.search(_line)
+    if not result:
         return None
 
     else:
         f = float(result.group(1))
         if DEBUG:
-            print('Trobat: ', f)
+            print('Found: ', f)
         return f
 
 
@@ -95,7 +99,7 @@ if __name__ == "__main__":
     try:
         input_file_name = sys.argv[1]
     except IndexError:
-        print('Asumint que el fitxer per defecte és "{0}'.format(DEFAULT_FILE_NAME))
+        print('The data file will be "{0}'.format(DEFAULT_FILE_NAME))
         input_file_name = DEFAULT_FILE_NAME
 
     lines = read_file(input_file_name)
@@ -117,14 +121,14 @@ if __name__ == "__main__":
             # Llegeix ses hores sense calcular
             total_time = read_non_calculated_hours(line)
             if not total_time:
-                sys.exit('Error: no se por interpretar el format de la linia "{0}"'.format(line))
+                sys.exit('Error in line format "{0}"'.format(line))
 
             # Convertim el temps a format decimal
             hexa_time = str(total_time)
             splitted_time = hexa_time.split(':')
             decimal_time = int(splitted_time[0]) + (int(splitted_time[1]) / 60)
             formatted_time = '{0} [{1:0.2f} h]'.format(hexa_time, decimal_time)
-            print('Afegides {0:0.2f} hores'.format(decimal_time))
+            print('Added {0:0.2f} Hours'.format(decimal_time))
 
             # Actualitza ses hores del mes en curs
             months[current_month] = months.get(current_month, 0) + decimal_time
@@ -138,21 +142,21 @@ if __name__ == "__main__":
             decimal_time = read_calculated_hours(line)
 
             if decimal_time is None:
-                sys.exit('Error: no se por interpretar el format de la linia "{0}"'.format(line))
+                sys.exit('Error in line format "{0}"'.format(line))
             else:
-                print("Ja n'hi havien {0:0.2f} hores".format(decimal_time))
+                print("There were already {0:0.2f} hours".format(decimal_time))
 
                 # Actualitza ses hores del mes en curs
                 months[current_month] = months.get(current_month, 0) + decimal_time
 
     # Escriu el resumen
     lines = lines[: summary_line_index]
-    lines.append('\n# Summary:\n')
+    lines.append('# Summary:\n')
     for month in months:
         lines.append('\t- {0} = {1:0.2f} h\n'.format(month, months.get(month, 0)))
 
-    if (modified_lines == 0):
-        print("No hi han canvis a processar")
+    if not modified_lines:
+        print("No changes to process")
     else:
         backup(input_file_name)
         save(input_file_name, lines)
