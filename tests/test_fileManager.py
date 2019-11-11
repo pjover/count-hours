@@ -2,14 +2,13 @@ import logging
 from unittest.mock import MagicMock, call
 
 import pytest
-from assertpy import assert_that
 from pytest import raises
 from testfixtures import LogCapture
 
 from FileManager import FileManager
 
 
-def teardown_module(module):
+def teardown_module():
     LogCapture.uninstall_all()
 
 
@@ -83,7 +82,7 @@ def test_load(monkeypatch, sut):
 
     actual = sut.load()
 
-    assert_that(actual).is_equal_to(expected)
+    assert actual == expected
     open_mock.assert_called_once_with('dir/filename.ext', 'r', encoding='utf-8')
 
 

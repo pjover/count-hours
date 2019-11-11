@@ -1,7 +1,6 @@
 import logging
 
 import pytest
-from assertpy import assert_that
 from testfixtures import LogCapture
 
 from MarkdownProcessor import MarkdownProcessor
@@ -36,8 +35,8 @@ def test_process_without_changes(sut):
     actual = sut.process(lines)
     has_changed = sut.has_changed()
 
-    assert_that(actual).is_equal_to(lines)
-    assert_that(has_changed).is_false()
+    assert actual == lines
+    assert not has_changed
 
 
 def test_process_with_changes(sut):
@@ -85,20 +84,20 @@ def test_process_with_changes(sut):
         '- 2014-02 = 0.78 h\n',
         '- 2014-01 = 2.96 h\n'
     ]
-    assert_that(actual).is_equal_to(expected)
-    assert_that(has_changed).is_true()
+    assert actual == expected
+    assert has_changed
 
 
 def test_parse_current_month(sut):
-    assert_that(sut.parse_current_month('## Date: 2013-08-10\n')).is_equal_to('2013-08')
-    assert_that(sut.parse_current_month('## Date: 2013-08-10\n')).is_not_equal_to('2013-08-10')
+    assert sut.parse_current_month('## Date: 2013-08-10\n') == '2013-08'
+    assert sut.parse_current_month('## Date: 2013-08-10\n') != '2013-08-10'
 
 
 def test_parse_non_calculated_hours(sut):
-    assert_that(str(sut.parse_non_calculated_hours('Hours: ? (16:00-16:20 + 19:00-20:30)\n'))).is_equal_to('1:50:00')
-    assert_that(str(sut.parse_non_calculated_hours('Hours: ? (16:00-16:20 + 19:00-20:30)\n'))).is_not_equal_to('1:50')
+    assert str(sut.parse_non_calculated_hours('Hours: ? (16:00-16:20 + 19:00-20:30)\n')) == '1:50:00'
+    assert str(sut.parse_non_calculated_hours('Hours: ? (16:00-16:20 + 19:00-20:30)\n')) != '1:50'
 
 
 def test_parse_calculated_hours(sut):
-    assert_that(sut.parse_calculated_hours('Hours: 1:50:00 [1.83 h] (16:00-16:20 + 19:00-20:30)\n')).is_equal_to(1.83)
-    assert_that(sut.parse_calculated_hours('Hours: 1:50:00 [1.83 h] (16:00-16:20 + 19:00-20:30)\n')).is_not_equal_to(1.833)
+    assert sut.parse_calculated_hours('Hours: 1:50:00 [1.83 h] (16:00-16:20 + 19:00-20:30)\n') == 1.83
+    assert sut.parse_calculated_hours('Hours: 1:50:00 [1.83 h] (16:00-16:20 + 19:00-20:30)\n') != 1.833
