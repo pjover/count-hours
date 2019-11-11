@@ -6,7 +6,7 @@ from testfixtures import LogCapture
 from MarkdownProcessor import MarkdownProcessor
 
 
-def teardown_module(module):
+def teardown_module():
     LogCapture.uninstall_all()
 
 

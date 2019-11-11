@@ -12,13 +12,13 @@ def parse_arguments():
     parser.add_argument("file_path", type=str, help="The Markdown file to process")
     parser.add_argument("-bf", "--backup_folder", type=str, help="Folder to store the backups", default='log_backups')
     parser.add_argument("-d", "--debug", help="Shows all the DEBUG level logging messages", action='store_true')
-    args = parser.parse_args()
-    if args.debug:
+    _args = parser.parse_args()
+    if _args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
         logging.info('Showing all the DEBUG level logging messages')
     else:
         logging.getLogger().setLevel(logging.INFO)
-    return args
+    return _args
 
 
 if __name__ == "__main__":
