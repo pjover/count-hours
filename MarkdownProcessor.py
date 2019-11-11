@@ -6,7 +6,7 @@ from datetime import datetime
 class MarkdownProcessor:
     _modified_lines = 0
     _parse_current_month_re = re.compile(r'([0-9]{4}-[0-9]{2})')
-    _parse_non_calculated_hours_segments_re = re.compile(r'[(]([-+: 0-9]*)[)]')
+    _parse_non_calculated_hours_segments_re = re.compile(r'[{]([-+: 0-9]*)[}]')
     _parse_non_calculated_hours_segment_re = re.compile(r'([0-2][0-9]:[0-5][0-9])-([0-2][0-9]:[0-5][0-9])')
     _parse_calculated_hours_re = re.compile(r'\[([.0-9]*)[ h\]]')
 
